@@ -12,3 +12,7 @@ class AbstractScheduler(ABC):
     def new_process(self, process: Process):
         pass
 
+    @abstractmethod
+    def is_finished(self):
+        pass
+

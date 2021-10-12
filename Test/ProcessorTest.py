@@ -1,6 +1,8 @@
 import unittest
+from unittest.mock import Mock
 from VirtulizeOS.module import *
 from VirtulizeOS.process import Process
+from Schedulers.module import AbstractScheduler
 
 
 class ProcessorFunctionalTest(unittest.TestCase):
