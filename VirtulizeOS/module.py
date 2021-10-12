@@ -9,7 +9,7 @@ class Processor:
 
     def boot(self):
         assert self.history is None, "already booted, shutdown() first"
-        self.history = queue.Queue()
+        self.history = []
         pass
 
     def shutdown(self):
@@ -18,13 +18,13 @@ class Processor:
 
     def run(self, process=None):
         if process is not None:
-            self.history.put(process)
+            self.history.append(process)
             return
-        self.history.put("free")
+        self.history.append("free")
 
     def get_time(self):
         assert self.history is not None, "processor not running, use boot() first"
-        return self.history.qsize()
+        return len(self.history)
 
 
 class OS:
