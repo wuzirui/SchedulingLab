@@ -81,5 +81,7 @@ class VirtualOS:
             self.cpu.run(self.scheduler.next_to_run())
 
         self.cpu.run(None)
-        print(self.cpu.history)
+        ret = self.cpu.history
+        print(ret)
         self.cpu.shutdown()
+        return ret
