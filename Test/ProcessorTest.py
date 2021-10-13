@@ -41,7 +41,18 @@ class VOSTest(unittest.TestCase):
         os = VirtualOS(FIFSScheduler())
         os.load_processes([process1, process2, process3])
         ret = os.run_from_start()
-        self.assertEqual(ret, [3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, "free"])
+        self.assertEqual(ret, [3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2])
+
+    def test_calc_wait_and_turn_around(self):
+        process1 = Process(1, 0, 24)
+        process2 = Process(2, 0, 3)
+        process3 = Process(3, 0, 3)
+
+        os = VirtualOS(FIFSScheduler())
+        os.load_processes([process1, process2, process3])
+        ret = os.run_from_start()
+        self.assertEqual(51, os.get_total_wait())
+        self.assertEqual(27, os.get_avg_turn_around())
 
 
 if __name__ == '__main__':
