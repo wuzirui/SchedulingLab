@@ -92,26 +92,56 @@ class VirtualOS:
             next_process.remain_time -= 1
             if next_process.remain_time == 0:
                 self.scheduler.process_done(next_pid)
+                next_process.finish_time = clock
+                next_process.total_wait = clock - next_process.arrival_time - next_process.process_time + 1
             next_process.history[-1] = "run"
         else:
             self.cpu.wait(1)
 
-    def run_from_start(self):
+    def run_from_start(self, print_history=True):
         self.cpu.boot()
         self._init_processes()
         self.clock = 0
         while self.cpu_busy < self.total_process_time:
             self._time_pulse(self.clock)
             self.clock += 1
-        self.print_history()
+        if print_history:
+            self.print_history(self.cpu.history)
         self.print_statistic()
         return self.cpu.shutdown()
 
-    def print_history(self):
-        print(list(range(self.clock)))
+    def print_history(self, cpu_his):
+        print("Process History in Detail")
+        print("-" * (20 + len(self.process_pool) * 10))
+        print("%6s%10s" % ("clock", "CPU"), end="")
         for _, process in self.process_pool:
-            print(process.history)
+            print("%10s" % process.pid, end="")
+        else:
+            print("")
+        for clock in range(self.clock):
+            print("%4d" % clock, end='  ')
+            print("%10s" % cpu_his[clock], end="")
+            for _, process in self.process_pool:
+                print("%10s" % process.history[clock], end="")
+            else:
+                print("\n")
 
     def print_statistic(self):
-        pass
+        print("Process Statistics in Detail")
+        print("-" * (20 + len(self.process_pool) * 10))
+        print("%15s" % "stat", end="")
+        for _, process in self.process_pool:
+            print("%10s" % process.pid, end="")
+        else:
+            print("")
 
+        total_wait = 0
+        print("%15s" % "total wait", end="")
+        for _, process in self.process_pool:
+            print("%10s" % process.total_wait, end="")
+            total_wait += process.total_wait
+        else:
+            print("")
+
+        print("%15s" % "avg wait", end="")
+        print("%10f" % (total_wait / len(self.process_pool)))
