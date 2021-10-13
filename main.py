@@ -9,5 +9,3 @@ if __name__ == "__main__":
     os = VirtualOS(FIFSScheduler())
     os.load_processes([process1, process2, process3])
     os.run_from_start()
-
-

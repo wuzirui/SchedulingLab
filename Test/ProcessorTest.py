@@ -33,7 +33,7 @@ class VOSTest(unittest.TestCase):
         self.assertEqual(os.size_of_pool(), 3)
         self.assertEqual(os.next_coming_process().pid, 3)
 
-    def test_use_FIFS(self):
+    def test_run_from_start(self):
         process1 = Process(1, 1, 10)
         process2 = Process(2, 2, 1)
         process3 = Process(3, 0, 5)
@@ -42,7 +42,6 @@ class VOSTest(unittest.TestCase):
         os.load_processes([process1, process2, process3])
         ret = os.run_from_start()
         self.assertEqual(ret, [3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, "free"])
-
 
 
 if __name__ == '__main__':

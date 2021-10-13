@@ -5,7 +5,7 @@ from VirtulizeOS.process import Process
 class AbstractScheduler(ABC):
 
     @abstractmethod
-    def next_to_run(self):
+    def next_to_run(self) -> int:
         pass
 
     @abstractmethod
@@ -13,6 +13,5 @@ class AbstractScheduler(ABC):
         pass
 
     @abstractmethod
-    def is_finished(self):
+    def process_done(self, process: int):
         pass
-

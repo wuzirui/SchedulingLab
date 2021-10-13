@@ -5,21 +5,15 @@ from collections import deque
 
 class FIFSScheduler(AbstractScheduler):
     processes = deque()
-    finish_time_dict = {}
 
-    def next_to_run(self):
+    def next_to_run(self) -> int:
         if len(self.processes) == 0:
-            return None
-        ret = self.processes[0]
-        ret.remain_time -= 1
-        if ret.remain_time == 0:
-            self.processes.popleft()
-        return ret
+            return -1
+        return self.processes[0].pid
 
     def new_process(self, process: Process):
-        assert process.process_time > 0
-        process.remain_time = process.process_time
         self.processes.append(process)
 
-    def is_finished(self):
-        return self.processes is None or len(self.processes) == 0
+    def process_done(self, pid: int):
+        assert len(self.processes) > 0, "no process in queue"
+        assert self.processes.popleft().pid == pid
