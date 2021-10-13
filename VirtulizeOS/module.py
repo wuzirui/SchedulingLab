@@ -124,24 +124,28 @@ class VirtualOS:
             for _, process in self.process_pool:
                 print("%10s" % process.history[clock], end="")
             else:
-                print("\n")
+                print("")
+        else:
+            print("")
+
+    def _print_attr_foreach_process(self, title: str, attr: str):
+        print("%15s" % title, end="")
+        for _, process in self.process_pool:
+            print("%10s" % process.__getattribute__(attr), end="")
+        else:
+            print("")
 
     def print_statistic(self):
         print("Process Statistics in Detail")
         print("-" * (20 + len(self.process_pool) * 10))
-        print("%15s" % "stat", end="")
-        for _, process in self.process_pool:
-            print("%10s" % process.pid, end="")
-        else:
-            print("")
+        self._print_attr_foreach_process("stat", "pid")
+        self._print_attr_foreach_process("arrival time", "arrival_time")
+        self._print_attr_foreach_process("process time", "process_time")
+        self._print_attr_foreach_process("total wait", "total_wait")
 
         total_wait = 0
-        print("%15s" % "total wait", end="")
         for _, process in self.process_pool:
-            print("%10s" % process.total_wait, end="")
             total_wait += process.total_wait
-        else:
-            print("")
 
         print("%15s" % "avg wait", end="")
         print("%10f" % (total_wait / len(self.process_pool)))
