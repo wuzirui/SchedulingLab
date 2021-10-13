@@ -22,6 +22,9 @@ class Processor:
         self.history = None
         return ret
 
+    def is_running(self):
+        return self.history is not None
+
     def run(self, process: Process = None):
         if process is None:
             self.history.append("free")
@@ -62,7 +65,7 @@ class VirtualOS:
     def load_process(self, process):
         if not self.process_dict.get(process.pid) is None:
             raise KeyError("Duplicate PID")
-        heapq.heappush(self.process_pool, [process.arrival_time, process])
+        heapq.heappush(self.process_pool, [process.arrival_time + 0.0000001 * self.get_process_num(), process])
         self.process_dict[process.pid] = process
 
     def size_of_pool(self):
@@ -90,15 +93,18 @@ class VirtualOS:
             assert next_process.remain_time > 0
             self.cpu_busy += self.cpu.run(next_process)
             next_process.remain_time -= 1
+            next_process.history[-1] = "run"
             if next_process.remain_time == 0:
                 self.scheduler.process_done(next_pid)
                 next_process.finish_time = clock
                 next_process.total_wait = clock - next_process.arrival_time - next_process.process_time + 1
-            next_process.history[-1] = "run"
+                next_process.turn_around = next_process.total_wait + next_process.process_time
         else:
             self.cpu.wait(1)
 
     def run_from_start(self, print_history=True):
+        if self.cpu.is_running():
+            self.cpu.shutdown()
         self.cpu.boot()
         self._init_processes()
         self.clock = 0
@@ -108,7 +114,7 @@ class VirtualOS:
         if print_history:
             self.print_history(self.cpu.history)
         self.print_statistic()
-        return self.cpu.shutdown()
+        return self.cpu.history
 
     def print_history(self, cpu_his):
         print("Process History in Detail")
@@ -135,6 +141,9 @@ class VirtualOS:
         else:
             print("")
 
+    def _print_single_stat(self, title: str, data: float):
+        print("%15s%10f" % (title, data))
+
     def print_statistic(self):
         print("Process Statistics in Detail")
         print("-" * (20 + len(self.process_pool) * 10))
@@ -142,10 +151,27 @@ class VirtualOS:
         self._print_attr_foreach_process("arrival time", "arrival_time")
         self._print_attr_foreach_process("process time", "process_time")
         self._print_attr_foreach_process("total wait", "total_wait")
+        self._print_attr_foreach_process("turn around", "turn_around")
 
+        self._print_single_stat("avg wait", self.get_avg_wait())
+        self._print_single_stat("avg turn around", self.get_avg_turn_around())
+
+    def get_total_wait(self):
         total_wait = 0
         for _, process in self.process_pool:
             total_wait += process.total_wait
+        return total_wait
 
-        print("%15s" % "avg wait", end="")
-        print("%10f" % (total_wait / len(self.process_pool)))
+    def get_process_num(self):
+        return len(self.process_pool)
+
+    def get_avg_wait(self):
+        return self.get_total_wait() / self.get_process_num()
+
+    def get_avg_turn_around(self):
+        total_turn_around= 0
+        for _, process in self.process_pool:
+            total_turn_around += process.total_wait + process.process_time
+        return total_turn_around / self.get_process_num()
+
+
