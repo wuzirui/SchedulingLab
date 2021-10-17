@@ -59,7 +59,7 @@ class VirtualOS:
         for process in processes:
             self.load_process(process)
 
-    def load_process(self, process):
+    def load_process(self, process):  # 所有process加入待处理字典
         if not self.process_dict.get(process.pid) is None:
             raise KeyError("Duplicate PID")
         heapq.heappush(self.process_pool, [process.arrival_time, process])
@@ -83,9 +83,10 @@ class VirtualOS:
             process.history.append("ready" if process.arrival_time <= clock else "undefined")
             if process.remain_time == 0:
                 process.history[-1] = "Done"
-            if process.arrival_time == clock:
+            if process.arrival_time == clock:  # 判断是否有已经就绪者，加入就绪
                 self.scheduler.new_process(copy.copy(process))
-        if (next_pid := self.scheduler.next_to_run()) >= 0:
+        next_pid = self.scheduler.next_to_run()
+        if next_pid >= 0:
             next_process = self.process_dict[next_pid]
             assert next_process.remain_time > 0
             self.cpu_busy += self.cpu.run(next_process)
@@ -104,7 +105,7 @@ class VirtualOS:
         self.clock = 0
         while self.cpu_busy < self.total_process_time:
             self._time_pulse(self.clock)
-            self.clock += 1
+            self.clock += 1  # 每一次都要加一然后进入time_pulse
         if print_history:
             self.print_history(self.cpu.history)
         self.print_statistic()
